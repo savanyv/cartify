@@ -27,6 +27,7 @@ type JWTService interface {
 	GenerateAccessToken(userID, username, email, role string, tokenVersion int) (string, error)
 	GenerateRefreshToken(userID string) (string, error)
 	ValidateToken(tokenString string) (*JWTClaims, error)
+	ValidateRefreshToken(tokenString string) (*jwt.RegisteredClaims, error)
 }
 
 type jwtService struct {
@@ -109,5 +110,30 @@ func (j *jwtService) ValidateToken(tokenString string) (*JWTClaims, error) {
 	if !ok || !token.Valid {
 		return nil, errors.New("invalid token")
 	}
+	return claims, nil
+}
+
+func (j *jwtService) ValidateRefreshToken(tokenString string) (*jwt.RegisteredClaims, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&jwt.RegisteredClaims{},
+		func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, jwt.ErrInvalidKey
+			}
+			return j.secretKey, nil
+		},
+		jwt.WithIssuer(jwtIssuer),
+		jwt.WithAudience(jwtAudience),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid refresh token")
+	}
+
 	return claims, nil
 }
