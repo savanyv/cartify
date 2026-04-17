@@ -13,7 +13,9 @@ import (
 	"github.com/savanyv/cartify/config"
 	"github.com/savanyv/cartify/internal/delivery/routes"
 	"github.com/savanyv/cartify/internal/infrastructure"
+	"github.com/savanyv/cartify/internal/infrastructure/seed"
 	"github.com/savanyv/cartify/internal/middlewares"
+	"github.com/savanyv/cartify/internal/utils/helpers"
 )
 
 type Server struct {
@@ -45,6 +47,10 @@ func (s *Server) Start() error {
 
 	s.setupMiddlewares()
 
+	if s.config.IsDevelopment() {
+		bcryptService := helpers.NewBcryptService()
+		seed.SeedAdmin(db, bcryptService)
+	}
 	routes.RegisterRoutes(s.app, db)
 
 	addr := fmt.Sprintf(":%s", s.config.AppPort)
