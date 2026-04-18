@@ -21,3 +21,7 @@ func (pv *ProductVariant) HasStock(qty int) bool {
 func (pv *ProductVariant) ReduceStock(qty int) {
 	pv.Stock -= qty
 }
+
+func (pv *ProductVariant) AddStock(qty int) {
+	pv.Stock += qty
+}
