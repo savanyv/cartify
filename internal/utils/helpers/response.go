@@ -7,8 +7,8 @@ import (
 type Response struct {
 	Success    bool        `json:"success"`
 	Message    string      `json:"message"`
-	Data       interface{} `json:"data,omitempty"`
 	Pagination interface{} `json:"pagination,omitempty"`
+	Data       interface{} `json:"data,omitempty"`
 	Error      interface{} `json:"error,omitempty"`
 }
 
@@ -29,7 +29,6 @@ func SuccessPaginated(c *fiber.Ctx, message string, data interface{}, total int6
 	return c.Status(fiber.StatusOK).JSON(Response{
 		Success: true,
 		Message: message,
-		Data:    data,
 		Pagination: PaginationMeta{
 			Total:      total,
 			Page:       page,
@@ -38,6 +37,7 @@ func SuccessPaginated(c *fiber.Ctx, message string, data interface{}, total int6
 			HasPrev:    hasPrev,
 			HasNext:    hasNext,
 		},
+		Data:    data,
 	})
 }
 
