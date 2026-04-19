@@ -39,3 +39,11 @@ type CartRepository interface {
 	RemoveItem(ctx context.Context, cartItemID string) error
 	ClearCart(ctx context.Context, cartID string) error
 }
+
+type OrderRepository interface {
+	Create(ctx context.Context, order *Order) error
+	FindByID(ctx context.Context, ID string) (*Order, error)
+	FindByUserID(ctx context.Context, userID string, page, limi int, search, sort, order string) ([]Order, int64, error)
+	FindAll(ctx context.Context, page, limit int, search, sort, order string) ([]Order, int64, error)
+	UpdateStatus(ctx context.Context, ID string, status OrderStatus) error
+}

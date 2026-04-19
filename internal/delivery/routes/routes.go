@@ -7,15 +7,17 @@ import (
 )
 
 func RegisterRoutes(app fiber.Router, db *gorm.DB) {
-	jwtService := helpers.NewJWTService()
-	bcryptService := helpers.NewBcryptService()
+	api := app.Group("/api/v1")
 
 	healthChecker := NewHealthChecker(db)
 	app.Get("/health", healthChecker.HealthCheck)
 
-	api := app.Group("/api/v1")
+	jwtService := helpers.NewJWTService()
+	bcryptService := helpers.NewBcryptService()
+
 
 	productRegisterRoute(api, db, jwtService)
 	cartRegisterRoute(api, db, jwtService)
 	authRegisterRoute(api, db, jwtService, bcryptService)
+	orderRegisterRoute(api, db, jwtService)
 }

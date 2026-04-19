@@ -35,3 +35,12 @@ type Order struct {
 	User  User        `json:"user,omitempty" gorm:"foreignKey:UserID"`
 	Items []OrderItem `json:"items,omitempty" gorm:"foreignKey:OrderID"`
 }
+
+func (o *Order) CanBeCancelled() bool {
+	return o.Status == OrderStatusPending
+}
+
+func (o *Order) CanBePaid() bool {
+	return o.Status == OrderStatusPending
+}
+
