@@ -28,3 +28,13 @@ type ProductVariantRepository interface {
 	Update(ctx context.Context, variant *ProductVariant) error
 	UpdateStock(ctx context.Context, ID string, stock int) error
 }
+
+type CartRepository interface {
+	GetOrCreateCart(ctx context.Context, userID string) (*Cart, error)
+	AddItem(ctx context.Context, cartID string, variantID string, price float64, qty int) error
+	GetCartWithItems(ctx context.Context, userID string) (*Cart, error)
+	GetCartItem(ctx context.Context, cartID string, variantID string) (*CartItem, error)
+	UpdateItemQuantity(ctx context.Context, cartItemID string, qty int) error
+	RemoveItem(ctx context.Context, cartItemID string) error
+	ClearCart(ctx context.Context, cartID string) error
+}
