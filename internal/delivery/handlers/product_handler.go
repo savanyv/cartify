@@ -9,73 +9,77 @@ import (
 
 type ProductHandler struct {
 	productUsecase *usecase.ProductUsecase
-	validator *helpers.ValidatorService
+	validator      *helpers.ValidatorService
 }
 
 func NewProductHandler(pu *usecase.ProductUsecase) *ProductHandler {
 	return &ProductHandler{
 		productUsecase: pu,
-		validator: helpers.NewValidatorService(),
+		validator:      helpers.NewValidatorService(),
 	}
 }
 
 // ================== Product User ==================
+
 func (h *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
-	products, err := h.productUsecase.GetAllProducts(c.Context())
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+	search := c.Query("search", "")
+	sort := c.Query("sort", "created_at")
+	order := c.Query("order", "desc")
+
+	// Validate
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if order != "asc" && order != "desc" {
+		order = "desc"
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Products retrieved successfully",
-		"data":    products,
-	})
+	// Usecase returns: (items, total, error)
+	items, total, err := h.productUsecase.GetAllProductsWithPagination(c.Context(), page, limit, search, sort, order)
+	if err != nil {
+		return helpers.InternalServerError(c, err.Error())
+	}
+
+	return helpers.SuccessPaginated(c, "Products retrieved successfully", items, total, page, limit)
 }
 
 func (h *ProductHandler) GetProductByID(c *fiber.Ctx) error {
 	id := c.Params("id")
-	
+
 	product, err := h.productUsecase.GetProductByID(c.Context(), id)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.NotFound(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Product retrieved successfully",
-		"data":    product,
-	})
+	return helpers.Success(c, "Product retrieved successfully", product)
 }
 
 // ================== Product Admin ==================
+
 func (h *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 	var req dto.CreateProductRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
 	product, err := h.productUsecase.CreateProduct(c.Context(), req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "Product created successfully",
-		"data":    product,
-	})
+	return helpers.SuccessCreated(c, "Product created successfully", product)
 }
 
 func (h *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
@@ -83,72 +87,51 @@ func (h *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 	var req dto.UpdateProductRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
 	product, err := h.productUsecase.UpdateProduct(c.Context(), id, req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Product updated successfully",
-		"data":    product,
-	})
+	return helpers.Success(c, "Product updated successfully", product)
 }
 
 func (h *ProductHandler) DeleteProduct(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	if err := h.productUsecase.DeleteProduct(c.Context(), id); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Product deleted successfully",
-	})
+	return helpers.Success(c, "Product deleted successfully", nil)
 }
 
 // ================== Variant Admin ==================
+
 func (h *ProductHandler) CreateVariant(c *fiber.Ctx) error {
 	productID := c.Params("product_id")
 
 	var req dto.CreateVariantRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
 	variant, err := h.productUsecase.CreateVariant(c.Context(), productID, req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "Variant created successfully",
-		"data":    variant,
-	})
+	return helpers.SuccessCreated(c, "Variant created successfully", variant)
 }
 
 func (h *ProductHandler) UpdateVariant(c *fiber.Ctx) error {
@@ -156,26 +139,17 @@ func (h *ProductHandler) UpdateVariant(c *fiber.Ctx) error {
 
 	var req dto.UpdateVariantRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
 	variant, err := h.productUsecase.UpdateVariant(c.Context(), id, req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Variant updated successfully",
-		"data":    variant,
-	})
+	return helpers.Success(c, "Variant updated successfully", variant)
 }

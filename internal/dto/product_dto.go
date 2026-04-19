@@ -35,5 +35,5 @@ type ProductResponse struct {
 	Name string `json:"name"`
 	Description string `json:"description"`
 	CreatedAt string `json:"created_at"`
-	Variants []VariantResponse `json:"variants,omitempty"`
+	Variants []VariantResponse `json:"variants"`
 }

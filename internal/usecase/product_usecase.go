@@ -11,22 +11,23 @@ import (
 )
 
 type ProductUsecase struct {
-	productRepo model.ProductRepository
+	productRepo        model.ProductRepository
 	productVariantRepo model.ProductVariantRepository
 }
 
 func NewProductUsecase(pr model.ProductRepository, pvr model.ProductVariantRepository) *ProductUsecase {
 	return &ProductUsecase{
-		productRepo: pr,
+		productRepo:        pr,
 		productVariantRepo: pvr,
 	}
 }
 
 // ========================== Product Methods (Public) ==========================
-func (u *ProductUsecase) GetAllProducts(ctx context.Context) ([]dto.ProductResponse, error) {
-	products, err := u.productRepo.FindAll(ctx)
+
+func (u *ProductUsecase) GetAllProductsWithPagination(ctx context.Context, page, limit int, search, sort, order string) ([]dto.ProductResponse, int64, error) {
+	products, total, err := u.productRepo.FindAllWithPagination(ctx, page, limit, search, sort, order)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var responses []dto.ProductResponse
@@ -34,7 +35,7 @@ func (u *ProductUsecase) GetAllProducts(ctx context.Context) ([]dto.ProductRespo
 		responses = append(responses, u.toProductResponse(&product))
 	}
 
-	return responses, nil
+	return responses, total, nil
 }
 
 func (u *ProductUsecase) GetProductByID(ctx context.Context, ID string) (*dto.ProductResponse, error) {
@@ -42,7 +43,6 @@ func (u *ProductUsecase) GetProductByID(ctx context.Context, ID string) (*dto.Pr
 	if err != nil {
 		return nil, err
 	}
-
 	if product == nil {
 		return nil, errors.New("product not found")
 	}
@@ -54,7 +54,7 @@ func (u *ProductUsecase) GetProductByID(ctx context.Context, ID string) (*dto.Pr
 // ========================== Product Methods (Admin) ==========================
 func (u *ProductUsecase) CreateProduct(ctx context.Context, req dto.CreateProductRequest) (*dto.ProductResponse, error) {
 	product := &model.Product{
-		Name: req.Name,
+		Name:        req.Name,
 		Description: req.Description,
 	}
 
@@ -88,7 +88,6 @@ func (u *ProductUsecase) UpdateProduct(ctx context.Context, ID string, req dto.U
 
 	product, _ = u.productRepo.FindByID(ctx, ID)
 	resp := u.toProductResponse(product)
-
 	return &resp, nil
 }
 
@@ -100,7 +99,6 @@ func (u *ProductUsecase) DeleteProduct(ctx context.Context, ID string) error {
 	if product == nil {
 		return errors.New("product not found")
 	}
-
 	return u.productRepo.Delete(ctx, ID)
 }
 
@@ -121,9 +119,9 @@ func (u *ProductUsecase) CreateVariant(ctx context.Context, productID string, re
 
 	variant := &model.ProductVariant{
 		ProductID: parsedProductID,
-		Name: req.Name,
-		Stock: req.Stock,
-		Price: req.Price,
+		Name:      req.Name,
+		Stock:     req.Stock,
+		Price:     req.Price,
 	}
 
 	if err := u.productVariantRepo.Create(ctx, variant); err != nil {
@@ -169,20 +167,20 @@ func (u *ProductUsecase) toProductResponse(p *model.Product) dto.ProductResponse
 	}
 
 	return dto.ProductResponse{
-		ID: p.ID.String(),
-		Name: p.Name,
+		ID:          p.ID.String(),
+		Name:        p.Name,
 		Description: p.Description,
-		CreatedAt: p.CreatedAt.Format(time.RFC3339),
-		Variants: variants,
+		CreatedAt:   p.CreatedAt.Format(time.RFC3339),
+		Variants:    variants,
 	}
 }
 
 func (u *ProductUsecase) toVariantResponse(v *model.ProductVariant) dto.VariantResponse {
 	return dto.VariantResponse{
-		ID: v.ID.String(),
-		Name: v.Name,
-		Stock: v.Stock,
-		Price: v.Price,
+		ID:        v.ID.String(),
+		Name:      v.Name,
+		Stock:     v.Stock,
+		Price:     v.Price,
 		ProductID: v.ProductID.String(),
 	}
 }

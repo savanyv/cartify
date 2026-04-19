@@ -28,7 +28,6 @@ func (r *productRepository) FindByID(ctx context.Context, ID string) (*model.Pro
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-
 	return &product, err
 }
 
@@ -38,7 +37,41 @@ func (r *productRepository) FindAll(ctx context.Context) ([]model.Product, error
 	return products, err
 }
 
-func (r productRepository) Update(ctx context.Context, product *model.Product) error {
+func (r *productRepository) FindAllWithPagination(ctx context.Context, page, limit int, search, sort, order string) ([]model.Product, int64, error) {
+	var products []model.Product
+	var total int64
+
+	query := r.db.WithContext(ctx).Model(&model.Product{}).Preload("Variants")
+
+	// Apply search
+	if search != "" {
+		query = query.Where("name ILIKE ? OR description ILIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	// Get total count
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Apply sorting
+	if sort == "" {
+		sort = "created_at"
+	}
+	if order == "" {
+		order = "desc"
+	}
+	query = query.Order(sort + " " + order)
+
+	// Apply pagination
+	offset := (page - 1) * limit
+	if err := query.Offset(offset).Limit(limit).Find(&products).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return products, total, nil
+}
+
+func (r *productRepository) Update(ctx context.Context, product *model.Product) error {
 	return r.db.WithContext(ctx).Save(product).Error
 }
 

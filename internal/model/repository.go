@@ -17,6 +17,7 @@ type ProductRepository interface {
 	Create(ctx context.Context, product *Product) error
 	FindByID(ctx context.Context, ID string) (*Product, error)
 	FindAll(ctx context.Context) ([]Product, error)
+	FindAllWithPagination(ctx context.Context, page, limit int, search, sort, order string) ([]Product, int64, error)
 	Update(ctx context.Context, product *Product) error
 	Delete(ctx context.Context, ID string) error
 }

@@ -9,13 +9,13 @@ import (
 
 type CartHandler struct {
 	cartUsecase *usecase.CartUsecase
-	validator *helpers.ValidatorService
+	validator   *helpers.ValidatorService
 }
 
 func NewCartHandler(cu *usecase.CartUsecase) *CartHandler {
 	return &CartHandler{
 		cartUsecase: cu,
-		validator: helpers.NewValidatorService(),
+		validator:   helpers.NewValidatorService(),
 	}
 }
 
@@ -24,15 +24,10 @@ func (h *CartHandler) GetCart(c *fiber.Ctx) error {
 
 	cart, err := h.cartUsecase.GetCart(c.Context(), userID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.InternalServerError(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Cart retrieved successfully",
-		"data":    cart,
-	})
+	return helpers.Success(c, "Cart retrieved successfully", cart)
 }
 
 func (h *CartHandler) AddToCart(c *fiber.Ctx) error {
@@ -40,81 +35,57 @@ func (h *CartHandler) AddToCart(c *fiber.Ctx) error {
 
 	var req dto.AddToCartRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
 	if err := h.cartUsecase.AddToCart(c.Context(), userID, req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Product added to cart successfully",
-	})
+	return helpers.Success(c, "Item added to cart successfully", nil)
 }
 
 func (h *CartHandler) UpdateCartItem(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
-	itemID := c.Params("item_id")
+	itemID := c.Params("itemId")
 
 	var req dto.UpdateCartItemRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
 	if err := h.cartUsecase.UpdateCartItem(c.Context(), userID, itemID, req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Cart item updated successfully",
-	})
+	return helpers.Success(c, "Cart item updated successfully", nil)
 }
 
 func (h *CartHandler) RemoveFromCart(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
-	itemID := c.Params("item_id")
+	itemID := c.Params("itemId")
 
 	if err := h.cartUsecase.RemoveFromCart(c.Context(), userID, itemID); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Product removed from cart successfully",
-	})
+	return helpers.Success(c, "Item removed from cart successfully", nil)
 }
 
 func (h *CartHandler) ClearCart(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 
 	if err := h.cartUsecase.ClearCart(c.Context(), userID); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.InternalServerError(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Cart cleared successfully",
-	})
+	return helpers.Success(c, "Cart cleared successfully", nil)
 }

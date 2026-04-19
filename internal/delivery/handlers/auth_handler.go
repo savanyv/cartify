@@ -22,55 +22,37 @@ func NewAuthHandler(au *usecase.AuthUsecase) *AuthHandler {
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req dto.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
-	res, err := h.authUsecase.Register(c.Context(), req)
+	resp, err := h.authUsecase.Register(c.Context(), req)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "Registration successful",
-		"data":    res,
-	})
+	return helpers.SuccessCreated(c, "Registration successful", resp)
 }
 
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req dto.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
-	res, err := h.authUsecase.Login(c.Context(), req)
+	resp, err := h.authUsecase.Login(c.Context(), req)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.Unauthorized(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Login successful",
-		"data":    res,
-	})
+	return helpers.Success(c, "Login successful", resp)
 }
 
 func (h *AuthHandler) GetProfile(c *fiber.Ctx) error {
@@ -78,15 +60,10 @@ func (h *AuthHandler) GetProfile(c *fiber.Ctx) error {
 
 	user, err := h.authUsecase.GetUserByID(c.Context(), userID)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.NotFound(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Profile retrieved successfully",
-		"data":    user,
-	})
+	return helpers.Success(c, "Profile retrieved", user)
 }
 
 func (h *AuthHandler) ChangePassword(c *fiber.Ctx) error {
@@ -94,65 +71,40 @@ func (h *AuthHandler) ChangePassword(c *fiber.Ctx) error {
 
 	var req dto.ChangePasswordRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
+		return helpers.BadRequest(c, "Invalid request body")
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.ValidationError(c, err.Error())
 	}
 
 	if err := h.authUsecase.ChangePassword(c.Context(), userID, req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Password changed successfully",
-	})
-}
-
-func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
-	var req dto.RefreshTokenRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-		})
-	}
-
-	if err := h.validator.Validate(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	res, err := h.authUsecase.RefreshToken(c.Context(), req.RefreshToken)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Token refreshed successfully",
-		"data":    res,
-	})
+	return helpers.Success(c, "Password changed successfully", nil)
 }
 
 func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 
 	if err := h.authUsecase.Logout(c.Context(), userID); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return helpers.BadRequest(c, err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Logout successful",
-	})
+	return helpers.Success(c, "Logout successful", nil)
+}
+
+func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
+	var req dto.RefreshTokenRequest
+	if err := c.BodyParser(&req); err != nil {
+		return helpers.BadRequest(c, "Invalid request body")
+	}
+
+	resp, err := h.authUsecase.RefreshToken(c.Context(), req.RefreshToken)
+	if err != nil {
+		return helpers.Unauthorized(c, err.Error())
+	}
+
+	return helpers.Success(c, "Token refreshed", resp)
 }
