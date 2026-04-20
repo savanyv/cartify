@@ -22,6 +22,7 @@ type ErrorInfo struct {
 	StatusCode int
 }
 
+// LogError logs detailed error information
 func LogError(c *fiber.Ctx, err error, functionName string, skipFrames ...int) {
 	skip := 2
 	if len(skipFrames) > 0 {
@@ -88,14 +89,14 @@ func getShortStackTrace() string {
 
 	for i := 0; i < len(lines); i++ {
 		line := lines[i]
-		
+
 		if strings.Contains(line, "github.com/gofiber/fiber") {
 			break
 		}
 		if strings.Contains(line, "runtime/") {
 			break
 		}
-		
+
 		for _, keyword := range relevantKeywords {
 			if strings.Contains(line, keyword) {
 				cleanLine := cleanStackTraceLine(line)
@@ -117,7 +118,7 @@ func cleanStackTraceLine(line string) string {
 	if len(parts) > 1 {
 		return "  " + parts[1]
 	}
-	
+
 	if strings.TrimSpace(line) != "" {
 		return "  " + line
 	}
@@ -130,24 +131,49 @@ func getFileName(fullPath string) string {
 }
 
 func printErrorLog(info ErrorInfo) {
-	log.Printf("\n" + strings.Repeat("=", 80))
-	log.Printf("❌ ERROR DETAILS")
-	log.Printf(strings.Repeat("=", 80))
-	log.Printf("📅 Time:       %s", info.Timestamp)
-	log.Printf("🆔 Request ID: %s", info.RequestID)
-	log.Printf("📍 Function:   %s", info.Function)
-	log.Printf("📁 File:       %s:%d", info.File, info.Line)
-	log.Printf("🌐 Endpoint:   %s %s", info.Method, info.Path)
-	log.Printf("📊 Status:     %d", info.StatusCode)
-	log.Printf("💬 Message:    %s", info.Message)
+	log.Print("\n" + strings.Repeat("=", 80))
+	log.Print("❌ ERROR DETAILS")
+	log.Print(strings.Repeat("=", 80))
+	
+	log.Print("📅 Time:       " + info.Timestamp)
+	log.Print("🆔 Request ID: " + info.RequestID)
+	log.Print("📍 Function:   " + info.Function)
+	log.Print("📁 File:       " + info.File + ":" + intToString(info.Line))
+	log.Print("🌐 Endpoint:   " + info.Method + " " + info.Path)
+	log.Print("📊 Status:     " + intToString(info.StatusCode))
+	log.Print("💬 Message:    " + info.Message)
 	
 	if info.StackTrace != "" && info.StackTrace != "  No relevant stack trace" {
-		log.Printf(strings.Repeat("-", 80))
-		log.Printf("📚 Stack Trace:")
-		log.Printf("%s", info.StackTrace)
+		log.Print(strings.Repeat("-", 80))
+		log.Print("📚 Stack Trace:")
+		log.Print(info.StackTrace)
 	}
 	
-	log.Printf(strings.Repeat("=", 80) + "\n")
+	log.Print(strings.Repeat("=", 80) + "\n")
+}
+
+func intToString(n int) string {
+	return itoa(n)
+}
+
+func itoa(n int) string {
+	if n == 0 {
+		return "0"
+	}
+	var digits []byte
+	neg := false
+	if n < 0 {
+		neg = true
+		n = -n
+	}
+	for n > 0 {
+		digits = append([]byte{byte('0' + n%10)}, digits...)
+		n /= 10
+	}
+	if neg {
+		return "-" + string(digits)
+	}
+	return string(digits)
 }
 
 func LogInfo(c *fiber.Ctx, message string) {
@@ -158,11 +184,7 @@ func LogInfo(c *fiber.Ctx, message string) {
 		}
 	}
 
-	log.Printf("[INFO] %s | Request-ID: %s | %s",
-		time.Now().Format("2006-01-02 15:04:05"),
-		requestID,
-		message,
-	)
+	log.Print("[INFO] " + time.Now().Format("2006-01-02 15:04:05") + " | Request-ID: " + requestID + " | " + message)
 }
 
 func LogDebug(c *fiber.Ctx, message string) {
@@ -173,11 +195,7 @@ func LogDebug(c *fiber.Ctx, message string) {
 		}
 	}
 
-	log.Printf("[DEBUG] %s | Request-ID: %s | %s",
-		time.Now().Format("2006-01-02 15:04:05"),
-		requestID,
-		message,
-	)
+	log.Print("[DEBUG] " + time.Now().Format("2006-01-02 15:04:05") + " | Request-ID: " + requestID + " | " + message)
 }
 
 func LogWarning(c *fiber.Ctx, message string) {
@@ -188,9 +206,5 @@ func LogWarning(c *fiber.Ctx, message string) {
 		}
 	}
 
-	log.Printf("[WARN] %s | Request-ID: %s | %s",
-		time.Now().Format("2006-01-02 15:04:05"),
-		requestID,
-		message,
-	)
+	log.Print("[WARN] " + time.Now().Format("2006-01-02 15:04:05") + " | Request-ID: " + requestID + " | " + message)
 }
