@@ -17,14 +17,13 @@ func orderRegisterRoute(app fiber.Router, db *gorm.DB, jwtService helpers.JWTSer
 	productVariantRepo := repository.NewProductVariantRepository(db)
 
 	orderUsecase := usecase.NewOrderUsecase(db, orderRepo, cartRepo, productVariantRepo)
-
 	orderHandler := handlers.NewOrderHandler(orderUsecase)
 
-	user := app.Group("/", middlewares.JWTMiddleware(jwtService))
+	orders := app.Group("/orders", middlewares.JWTMiddleware(jwtService))
 
-	user.Post("/orders", orderHandler.CreateOrder)
-	user.Get("/orders", orderHandler.GetUserOrders)
-	user.Get("/orders/:id", orderHandler.GetOrderByID)
+	orders.Post("/", orderHandler.CreateOrder)
+	orders.Get("/", orderHandler.GetUserOrders)
+	orders.Get("/:id", orderHandler.GetOrderByID)
 
 	admin := app.Group("/admin", middlewares.JWTMiddleware(jwtService), middlewares.RoleMiddleware(model.RoleAdmin))
 

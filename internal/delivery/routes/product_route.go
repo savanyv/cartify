@@ -14,16 +14,18 @@ import (
 func productRegisterRoute(app fiber.Router, db *gorm.DB, jwtService helpers.JWTService) {
 	productRepo := repository.NewProductRepository(db)
 	productVariantRepo := repository.NewProductVariantRepository(db)
+
 	productUsecase := usecase.NewProductUsecase(productRepo, productVariantRepo)
 	productHandler := handlers.NewProductHandler(productUsecase)
 
-	// ==================== PUBLIC ROUTES ====================
-	public := app.Group("/")
-	public.Get("/products", productHandler.GetAllProducts)
-	public.Get("/products/:id", productHandler.GetProductByID)
+	// PUBLIC
+	public := app.Group("/products")
+	public.Get("/", productHandler.GetAllProducts)
+	public.Get("/:id", productHandler.GetProductByID)
 
-	// ==================== ADMIN ROUTES ====================
+	// ADMIN
 	admin := app.Group("/admin", middlewares.JWTMiddleware(jwtService), middlewares.RoleMiddleware(model.RoleAdmin))
+
 	admin.Post("/products", productHandler.CreateProduct)
 	admin.Put("/products/:id", productHandler.UpdateProduct)
 	admin.Delete("/products/:id", productHandler.DeleteProduct)

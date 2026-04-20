@@ -21,9 +21,7 @@ func authRegisterRoute(app fiber.Router, db *gorm.DB, jwtService helpers.JWTServ
 	auth.Post("/login", authHandler.Login)
 	auth.Post("/refresh", authHandler.RefreshToken)
 
-	protected := app.Group("/", middlewares.JWTMiddleware(jwtService))
-
-	user := protected.Group("/user")
+	user := app.Group("/user", middlewares.JWTMiddleware(jwtService))
 	user.Get("/profile", authHandler.GetProfile)
 	user.Post("/change-password", authHandler.ChangePassword)
 	user.Post("/logout", authHandler.Logout)

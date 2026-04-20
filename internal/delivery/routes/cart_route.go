@@ -15,7 +15,6 @@ func cartRegisterRoute(app fiber.Router, db *gorm.DB, jwtService helpers.JWTServ
 	productVariantRepo := repository.NewProductVariantRepository(db)
 
 	cartUsecase := usecase.NewCartUsecase(cartRepo, productVariantRepo)
-
 	cartHandler := handlers.NewCartHandler(cartUsecase)
 
 	cart := app.Group("/cart", middlewares.JWTMiddleware(jwtService))

@@ -15,9 +15,8 @@ func RegisterRoutes(app fiber.Router, db *gorm.DB) {
 	jwtService := helpers.NewJWTService()
 	bcryptService := helpers.NewBcryptService()
 
-
+	authRegisterRoute(api, db, jwtService, bcryptService)
 	productRegisterRoute(api, db, jwtService)
 	cartRegisterRoute(api, db, jwtService)
-	authRegisterRoute(api, db, jwtService, bcryptService)
 	orderRegisterRoute(api, db, jwtService)
 }
