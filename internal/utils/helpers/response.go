@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/savanyv/cartify/internal/utils/logger"
 )
 
 type Response struct {
@@ -37,7 +38,7 @@ func SuccessPaginated(c *fiber.Ctx, message string, data interface{}, total int6
 			HasPrev:    hasPrev,
 			HasNext:    hasNext,
 		},
-		Data:    data,
+		Data: data,
 	})
 }
 
@@ -58,10 +59,31 @@ func SuccessCreated(c *fiber.Ctx, message string, data interface{}) error {
 }
 
 func ErrorResponse(c *fiber.Ctx, statusCode int, message string, err interface{}) error {
+	var logErr error
+	if errStr, ok := err.(string); ok {
+		logErr = fiber.NewError(statusCode, errStr)
+	} else if err != nil {
+		logErr = fiber.NewError(statusCode, "unkown error")
+	} else {
+		logErr = fiber.NewError(statusCode, message)
+	}
+
+	logger.LogError(c, logErr, "", 3)
+
 	return c.Status(statusCode).JSON(Response{
 		Success: false,
 		Message: message,
-		Error:   err,
+		Error: err,
+	})
+}
+
+func ErrorResponseWithLog(c *fiber.Ctx, statusCode int, message string, err error, functionName string) error {
+	logger.LogError(c, err, functionName)
+
+	return c.Status(statusCode).JSON(Response{
+		Success: false,
+		Message: message,
+		Error:   err.Error(),
 	})
 }
 
