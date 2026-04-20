@@ -9,20 +9,21 @@ import (
 
 type Config struct {
 	AppName string
-	AppEnv string
+	AppEnv  string
 	AppPort string
 
-	DBHost string
-	DBPort string
-	DBUser string
+	DBHost     string
+	DBPort     string
+	DBUser     string
 	DBPassword string
-	DBName string
+	DBName     string
 
-	JWTSecret string
-	JWTExpiryHours int
+	JWTSecret             string
+	JWTExpiryHours        int
 	JWTRefreshExpiryHours int
 
 	CORSAllowedOrigins string
+	APIKey             string
 }
 
 func LoadConfig() *Config {
@@ -30,20 +31,21 @@ func LoadConfig() *Config {
 
 	return &Config{
 		AppName: loadEnv("APP_NAME"),
-		AppEnv: loadEnv("APP_ENV"),
+		AppEnv:  loadEnv("APP_ENV"),
 		AppPort: loadEnv("APP_PORT"),
 
-		DBHost: loadEnv("DB_HOST"),
-		DBPort: loadEnv("DB_PORT"),
-		DBUser: loadEnv("DB_USER"),
+		DBHost:     loadEnv("DB_HOST"),
+		DBPort:     loadEnv("DB_PORT"),
+		DBUser:     loadEnv("DB_USER"),
 		DBPassword: loadEnv("DB_PASSWORD"),
-		DBName: loadEnv("DB_NAME"),
+		DBName:     loadEnv("DB_NAME"),
 
-		JWTSecret: loadEnv("JWT_SECRET"),
-		JWTExpiryHours: loadEnvInt("JWT_EXPIRY_HOURS"),
+		JWTSecret:             loadEnv("JWT_SECRET"),
+		JWTExpiryHours:        loadEnvInt("JWT_EXPIRY_HOURS"),
 		JWTRefreshExpiryHours: loadEnvInt("JWT_REFRESH_EXPIRY_HOURS"),
 
 		CORSAllowedOrigins: loadEnv("CORS_ALLOWED_ORIGINS"),
+		APIKey:             loadEnv("API_KEY"),
 	}
 }
 

@@ -80,6 +80,11 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) setupMiddlewares() {
+	skipPath := []string{"/health"}
+
+	s.app.Use(middlewares.APIKeyMiddleware(s.config.APIKey, skipPath))
+	s.app.Use(middlewares.SecurityHeadersMiddleware())
+	s.app.Use(middlewares.RequestIDMiddleware())
 	s.app.Use(middlewares.RecoveryMiddleware())
 	s.app.Use(middlewares.LoggerMiddleware())
 	s.app.Use(middlewares.CORSMiddleware())
