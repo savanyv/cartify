@@ -7,6 +7,7 @@ Cartify adalah backend e-commerce yang dibangun dengan **Go**, **Fiber**, **GORM
 ## ✨ Fitur
 
 ### Core Features
+
 - **Authentication & Authorization**
   - Register, Login, Logout
   - JWT Access Token (24 jam) & Refresh Token (7 hari)
@@ -33,6 +34,7 @@ Cartify adalah backend e-commerce yang dibangun dengan **Go**, **Fiber**, **GORM
   - Auto-clear cart after checkout
 
 ### Security Features
+
 - Security headers (CSP, HSTS, XSS Protection)
 - Request ID for tracing
 - Rate limiting
@@ -40,6 +42,7 @@ Cartify adalah backend e-commerce yang dibangun dengan **Go**, **Fiber**, **GORM
 - API Key authentication
 
 ### Observability
+
 - Structured logging
 - Request ID tracking
 - Error logging with stack trace
@@ -48,14 +51,14 @@ Cartify adalah backend e-commerce yang dibangun dengan **Go**, **Fiber**, **GORM
 
 ## 🛠 Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| **Language** | Go 1.21+ |
-| **Framework** | Fiber v2 |
-| **Database** | PostgreSQL |
-| **ORM** | GORM |
-| **Auth** | JWT, bcrypt |
-| **Config** | godotenv |
+| Category      | Technology  |
+| ------------- | ----------- |
+| **Language**  | Go 1.21+    |
+| **Framework** | Fiber v2    |
+| **Database**  | PostgreSQL  |
+| **ORM**       | GORM        |
+| **Auth**      | JWT, bcrypt |
+| **Config**    | godotenv    |
 
 ---
 
@@ -87,7 +90,8 @@ cp .env.sample .env
 ```bash
 go run cmd/main.go
 ```
-Server akan berjalan di ```http://localhost:8000```
+
+Server akan berjalan di `http://localhost:8000`
 
 ## ⚙️ Environment Variables
 
@@ -125,66 +129,68 @@ http://localhost:8000
 ```
 
 ### Authentication
+
 ##### All Protected endpoints require :
-- ```X-API-Key``` header
-- ```Authorization: Bearer <access_token>``` header (after login)
+
+- `X-API-Key` header
+- `Authorization: Bearer <access_token>` header (after login)
 
 ### Public Endpoints
 
-| METHOD | Endpoint | Description |
-|--------|----------|-------------|
-| **GET** | `/health` | Health check |
-| **POST** | `/api/v1/auth/register` | Register new user |
-| **POST** | `/api/v1/auth/login` | Login user |
-| **POST** | `/api/v1/auth/refresh` | Refresh access token |
-| **GET** | `/api/v1/products` | Get all products (paginated) |
-| **GET** | `/api/v1/products/:id` | Get product by ID |
+| METHOD   | Endpoint                | Description                  |
+| -------- | ----------------------- | ---------------------------- |
+| **GET**  | `/health`               | Health check                 |
+| **POST** | `/api/v1/auth/register` | Register new user            |
+| **POST** | `/api/v1/auth/login`    | Login user                   |
+| **POST** | `/api/v1/auth/refresh`  | Refresh access token         |
+| **GET**  | `/api/v1/products`      | Get all products (paginated) |
+| **GET**  | `/api/v1/products/:id`  | Get product by ID            |
 
 ### Protected Endpoints (User)
 
-| METHOD | Endpoint | Description |
-|--------|----------|-------------|
-| **GET** | `/api/v1/user/profile` | Get user profile |
-| **POST** | `/api/v1/user/change-password` | Change password |
-| **POST** | `/api/v1/user/logout` | Logout user |
-| **GET** | `/api/v1/cart` | Get user cart |
-| **POST** | `/api/v1/cart` | Add item to cart |
-| **PUT** | `/api/v1/cart/items/:item_id` | Update cart item |
-| **DELETE** | `/api/v1/cart/items/:item_id` | Remove cart item |
-| **DELETE** | `/api/v1/cart/clear` | Clear cart |
-| **POST** | `/api/v1/orders` | Create order |
-| **GET** | `/api/v1/orders` | Get user orders |
-| **GET** | `/api/v1/orders/:id` | Get order detail |
+| METHOD     | Endpoint                       | Description      |
+| ---------- | ------------------------------ | ---------------- |
+| **GET**    | `/api/v1/user/profile`         | Get user profile |
+| **POST**   | `/api/v1/user/change-password` | Change password  |
+| **POST**   | `/api/v1/user/logout`          | Logout user      |
+| **GET**    | `/api/v1/cart`                 | Get user cart    |
+| **POST**   | `/api/v1/cart`                 | Add item to cart |
+| **PUT**    | `/api/v1/cart/items/:item_id`  | Update cart item |
+| **DELETE** | `/api/v1/cart/items/:item_id`  | Remove cart item |
+| **DELETE** | `/api/v1/cart/clear`           | Clear cart       |
+| **POST**   | `/api/v1/orders`               | Create order     |
+| **GET**    | `/api/v1/orders`               | Get user orders  |
+| **GET**    | `/api/v1/orders/:id`           | Get order detail |
 
 ### Admin Endpoints
 
-| METHOD | Endpoint | Description |
-|--------|----------|-------------|
-| **POST** | `/api/v1/admin/products` | Create product |
-| **PUT** | `/api/v1/admin/products/:id` | Update product |
-| **DELETE** | `/api/v1/admin/products/:id` | Delete product |
-| **POST** | `/api/v1/admin/products/:product_id/variants` | Create variant |
-| **PUT** | `/api/v1/admin/products/variants/:id` | Update variant |
-| **GET** | `/api/v1/admin/orders` | Get all orders |
-| **PUT** | `/api/v1/admin/orders/:id/status` | Update order status |
+| METHOD     | Endpoint                                      | Description         |
+| ---------- | --------------------------------------------- | ------------------- |
+| **POST**   | `/api/v1/admin/products`                      | Create product      |
+| **PUT**    | `/api/v1/admin/products/:id`                  | Update product      |
+| **DELETE** | `/api/v1/admin/products/:id`                  | Delete product      |
+| **POST**   | `/api/v1/admin/products/:product_id/variants` | Create variant      |
+| **PUT**    | `/api/v1/admin/products/variants/:id`         | Update variant      |
+| **GET**    | `/api/v1/admin/orders`                        | Get all orders      |
+| **PUT**    | `/api/v1/admin/orders/:id/status`             | Update order status |
 
 ### Query Parameters (Pagination)
 
-| Parameters | Default | Description |
-|----------|------------|---------|
-| ```page``` | 1 | Page number |
-| ```limit``` | 10 | items per page (Max 100) |
-| ```search``` | "" | Search keyword |
-| ```sort``` | ```created_at``` | Sort field |
-| ```order``` | ```desc``` | Sort order (asc/desc) |
+| Parameters | Default      | Description              |
+| ---------- | ------------ | ------------------------ |
+| `page`     | 1            | Page number              |
+| `limit`    | 10           | items per page (Max 100) |
+| `search`   | ""           | Search keyword           |
+| `sort`     | `created_at` | Sort field               |
+| `order`    | `desc`       | Sort order (asc/desc)    |
 
 ### 📁 Project Structure
 
 ```text
 cartify/
 ├── cmd/api/main.go                 # Entry point
+├── config/                         # Configuration
 ├── internal/
-│   ├── config/                     # Configuration
 │   ├── delivery/
 │   │   ├── handlers/               # HTTP handlers
 │   │   └── routes/                 # Routes
@@ -203,12 +209,12 @@ cartify/
 
 After first run, admin account is auto-created:
 
-| Field | Value |
-|-------|-------|
-| Email | superadmin@cartify.com |
-| Password | superadmin123! |
+| Field    | Value                  |
+| -------- | ---------------------- |
+| Email    | superadmin@cartify.com |
+| Password | superadmin123!         |
 
-----
+---
 
 ### 📝 Response Format
 
@@ -251,5 +257,7 @@ After first run, admin account is auto-created:
 ```
 
 ### 👨‍💻 Author
+
 #### Savanyv
+
 - Github: @savanyv
