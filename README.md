@@ -258,6 +258,6 @@ After first run, admin account is auto-created:
 
 ### 👨‍💻 Author
 
-#### Savanyv
+#### Dmvsnx
 
-- Github: @savanyv
+- Github: @dmvsnx
