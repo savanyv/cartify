@@ -8,11 +8,11 @@ import (
 )
 
 type AuthHandler struct {
-	authUsecase *usecase.AuthUsecase
+	authUsecase usecase.AuthUsecaseInterface
 	validator   *helpers.ValidatorService
 }
 
-func NewAuthHandler(au *usecase.AuthUsecase) *AuthHandler {
+func NewAuthHandler(au usecase.AuthUsecaseInterface) *AuthHandler {
 	return &AuthHandler{
 		authUsecase: au,
 		validator:   helpers.NewValidatorService(),

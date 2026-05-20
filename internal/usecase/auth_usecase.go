@@ -12,15 +12,24 @@ import (
 )
 
 type AuthUsecase struct {
-	userRepo model.UserRepository
-	jwtService helpers.JWTService
+	userRepo      model.UserRepository
+	jwtService    helpers.JWTService
 	bcryptService helpers.BcryptService
+}
+
+type AuthUsecaseInterface interface {
+	Register(context.Context, dto.RegisterRequest) (*dto.RegisterResponse, error)
+	Login(context.Context, dto.LoginRequest) (*dto.LoginResponse, error)
+	GetUserByID(context.Context, string) (*dto.UserResponse, error)
+	ChangePassword(context.Context, string, dto.ChangePasswordRequest) error
+	RefreshToken(context.Context, string) (*dto.RefreshTokenResponse, error)
+	Logout(context.Context, string) error
 }
 
 func NewAuthUsecase(ur model.UserRepository, js helpers.JWTService, bs helpers.BcryptService) *AuthUsecase {
 	return &AuthUsecase{
-		userRepo: ur,
-		jwtService: js,
+		userRepo:      ur,
+		jwtService:    js,
 		bcryptService: bs,
 	}
 }
@@ -48,11 +57,11 @@ func (u *AuthUsecase) Register(ctx context.Context, req dto.RegisterRequest) (*d
 	}
 
 	user := &model.User{
-		Name: req.Name,
+		Name:     req.Name,
 		Username: req.Username,
-		Email: req.Email,
+		Email:    req.Email,
 		Password: hashedPassword,
-		Role: model.RoleUser,
+		Role:     model.RoleUser,
 	}
 
 	if err := u.userRepo.Create(ctx, user); err != nil {
@@ -62,11 +71,11 @@ func (u *AuthUsecase) Register(ctx context.Context, req dto.RegisterRequest) (*d
 	res := &dto.RegisterResponse{
 		Message: "User registered successfully",
 		User: dto.UserResponse{
-			ID: user.ID.String(),
-			Name: user.Name,
-			Username: user.Username,
-			Email: user.Email,
-			Role: string(user.Role),
+			ID:        user.ID.String(),
+			Name:      user.Name,
+			Username:  user.Username,
+			Email:     user.Email,
+			Role:      string(user.Role),
 			CreatedAt: user.CreatedAt.Format(time.RFC3339),
 		},
 	}
@@ -104,14 +113,14 @@ func (u *AuthUsecase) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	}
 
 	res := &dto.LoginResponse{
-		AccessToken: accessToken,
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		User: dto.UserResponse{
-			ID: user.ID.String(),
-			Name: user.Name,
-			Username: user.Username,
-			Email: user.Email,
-			Role: string(user.Role),
+			ID:        user.ID.String(),
+			Name:      user.Name,
+			Username:  user.Username,
+			Email:     user.Email,
+			Role:      string(user.Role),
 			CreatedAt: user.CreatedAt.Format(time.RFC3339),
 		},
 	}
@@ -129,11 +138,11 @@ func (u *AuthUsecase) GetUserByID(ctx context.Context, ID string) (*dto.UserResp
 	}
 
 	res := &dto.UserResponse{
-		ID: user.ID.String(),
-		Name: user.Name,
-		Username: user.Username,
-		Email: user.Email,
-		Role: string(user.Role),
+		ID:        user.ID.String(),
+		Name:      user.Name,
+		Username:  user.Username,
+		Email:     user.Email,
+		Role:      string(user.Role),
 		CreatedAt: user.CreatedAt.Format(time.RFC3339),
 	}
 
@@ -164,7 +173,7 @@ func (u *AuthUsecase) ChangePassword(ctx context.Context, userID string, req dto
 }
 
 func (u *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*dto.RefreshTokenResponse, error) {
-	claims, err := u.jwtService.ValidateRefreshToken(refreshToken)	
+	claims, err := u.jwtService.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return nil, errors.New("invalid refresh token")
 	}

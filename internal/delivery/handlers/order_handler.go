@@ -9,11 +9,11 @@ import (
 )
 
 type OrderHandler struct {
-	orderUsecase *usecase.OrderUsecase
+	orderUsecase usecase.OrderUsecaseInterface
 	validator    *helpers.ValidatorService
 }
 
-func NewOrderHandler(ou *usecase.OrderUsecase) *OrderHandler {
+func NewOrderHandler(ou usecase.OrderUsecaseInterface) *OrderHandler {
 	return &OrderHandler{
 		orderUsecase: ou,
 		validator:    helpers.NewValidatorService(),

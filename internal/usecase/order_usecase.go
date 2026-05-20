@@ -11,6 +11,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type OrderUsecaseInterface interface {
+	CreateOrder(context.Context, string) (*dto.OrderResponse, error)
+	GetuserOrders(context.Context, string, int, int, string, string, string) ([]dto.OrderResponse, int64, error)
+	GetOrderByID(context.Context, string, string) (*dto.OrderResponse, error)
+	GetAllOrders(context.Context, int, int, string, string, string) ([]dto.AdminOrderResponse, int64, error)
+	UpdateOrderStatus(context.Context, string, model.OrderStatus) error
+}
+
 type OrderUsecase struct {
 	db                 *gorm.DB
 	orderRepo          model.OrderRepository

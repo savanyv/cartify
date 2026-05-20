@@ -15,6 +15,16 @@ type ProductUsecase struct {
 	productVariantRepo model.ProductVariantRepository
 }
 
+type ProductUsecaseInterface interface {
+	GetAllProductsWithPagination(context.Context, int, int, string, string, string) ([]dto.ProductResponse, int64, error)
+	GetProductByID(context.Context, string) (*dto.ProductResponse, error)
+	CreateProduct(context.Context, dto.CreateProductRequest) (*dto.ProductResponse, error)
+	UpdateProduct(context.Context, string, dto.UpdateProductRequest) (*dto.ProductResponse, error)
+	DeleteProduct(context.Context, string) error
+	CreateVariant(context.Context, string, dto.CreateVariantRequest) (*dto.VariantResponse, error)
+	UpdateVariant(context.Context, string, dto.UpdateVariantRequest) (*dto.VariantResponse, error)
+}
+
 func NewProductUsecase(pr model.ProductRepository, pvr model.ProductVariantRepository) *ProductUsecase {
 	return &ProductUsecase{
 		productRepo:        pr,

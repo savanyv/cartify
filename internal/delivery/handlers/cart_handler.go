@@ -8,11 +8,11 @@ import (
 )
 
 type CartHandler struct {
-	cartUsecase *usecase.CartUsecase
+	cartUsecase usecase.CartUsecaseInterface
 	validator   *helpers.ValidatorService
 }
 
-func NewCartHandler(cu *usecase.CartUsecase) *CartHandler {
+func NewCartHandler(cu usecase.CartUsecaseInterface) *CartHandler {
 	return &CartHandler{
 		cartUsecase: cu,
 		validator:   helpers.NewValidatorService(),
@@ -51,7 +51,7 @@ func (h *CartHandler) AddToCart(c *fiber.Ctx) error {
 
 func (h *CartHandler) UpdateCartItem(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
-	itemID := c.Params("itemId")
+	itemID := c.Params("item_id")
 
 	var req dto.UpdateCartItemRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -71,7 +71,7 @@ func (h *CartHandler) UpdateCartItem(c *fiber.Ctx) error {
 
 func (h *CartHandler) RemoveFromCart(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
-	itemID := c.Params("itemId")
+	itemID := c.Params("item_id")
 
 	if err := h.cartUsecase.RemoveFromCart(c.Context(), userID, itemID); err != nil {
 		return helpers.BadRequest(c, err.Error())

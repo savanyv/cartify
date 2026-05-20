@@ -9,8 +9,16 @@ import (
 	"github.com/savanyv/cartify/internal/model"
 )
 
+type CartUsecaseInterface interface {
+	GetCart(context.Context, string) (*dto.CartResponse, error)
+	AddToCart(context.Context, string, dto.AddToCartRequest) error
+	UpdateCartItem(context.Context, string, string, dto.UpdateCartItemRequest) error
+	RemoveFromCart(context.Context, string, string) error
+	ClearCart(context.Context, string) error
+}
+
 type CartUsecase struct {
-	cartRepo model.CartRepository
+	cartRepo           model.CartRepository
 	productVariantRepo model.ProductVariantRepository
 }
 

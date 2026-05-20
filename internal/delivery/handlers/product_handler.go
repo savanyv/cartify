@@ -8,11 +8,11 @@ import (
 )
 
 type ProductHandler struct {
-	productUsecase *usecase.ProductUsecase
+	productUsecase usecase.ProductUsecaseInterface
 	validator      *helpers.ValidatorService
 }
 
-func NewProductHandler(pu *usecase.ProductUsecase) *ProductHandler {
+func NewProductHandler(pu usecase.ProductUsecaseInterface) *ProductHandler {
 	return &ProductHandler{
 		productUsecase: pu,
 		validator:      helpers.NewValidatorService(),
