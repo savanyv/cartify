@@ -20,8 +20,8 @@ type CartItemResponse struct {
 }
 
 type CartResponse struct {
-	ID string `json:"id"`
-	Items []CartItemResponse `json:"items"`
-	TotalPrice float64 `json:"total_price"`
-	ItemCount int `json:"item_count"`
+	ID string `json:"id,omitempty"`
+	Items []CartItemResponse `json:"items,omitempty"`
+	TotalPrice float64 `json:"total_price,omitempty"`
+	ItemCount int `json:"item_count,omitempty"`
 }

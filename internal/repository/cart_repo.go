@@ -88,7 +88,7 @@ func (r *cartRepository) GetCartWithItems(ctx context.Context, userID string) (*
 		Where("user_id = ?", parsedUserID).
 		First(&cart).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return &model.Cart{UserID: parsedUserID, Items: []model.CartItem{}}, nil
+		return nil, nil
 	}
 	return &cart, err
 }

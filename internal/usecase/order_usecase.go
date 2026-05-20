@@ -44,7 +44,7 @@ func (u *OrderUsecase) CreateOrder(ctx context.Context, userID string) (*dto.Ord
 		return nil, errors.New("cart is empty")
 	}
 
-	tx := u.db.Begin()
+	tx := u.db.WithContext(ctx).Begin()
 
 	var totalPrice float64
 	var orderItems []model.OrderItem
@@ -65,7 +65,9 @@ func (u *OrderUsecase) CreateOrder(ctx context.Context, userID string) (*dto.Ord
 		})
 
 		newStock := item.ProductVariant.Stock - item.Quantity
-		if err := u.productVariantRepo.UpdateStock(ctx, item.ProductVariantID.String(), newStock); err != nil {
+		if err := tx.Model(&model.ProductVariant{}).
+			Where("id = ?", item.ProductVariantID).
+			Update("stock", newStock).Error; err != nil {
 			tx.Rollback()
 			return nil, err
 		}
@@ -79,19 +81,23 @@ func (u *OrderUsecase) CreateOrder(ctx context.Context, userID string) (*dto.Ord
 		Items:      orderItems,
 	}
 
-	if err := u.orderRepo.Create(ctx, &order); err != nil {
+	if err := tx.Create(&order).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
-	if err := u.cartRepo.ClearCart(ctx, cart.ID.String()); err != nil {
+	if err := tx.Where("cart_id = ?", cart.ID).Delete(&model.CartItem{}).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
 	tx.Commit()
 
-	return u.toOrderResponse(&order), nil
+	createdOrder, err := u.orderRepo.FindByID(ctx, order.ID.String())
+	if err != nil {
+		return nil, err
+	}
+	return u.toOrderResponse(createdOrder), nil
 }
 
 func (u *OrderUsecase) GetuserOrders(ctx context.Context, userID string, page, limit int, search, sort, order string) ([]dto.OrderResponse, int64, error) {

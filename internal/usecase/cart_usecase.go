@@ -35,6 +35,10 @@ func (u *CartUsecase) GetCart(ctx context.Context, userID string) (*dto.CartResp
 		return nil, err
 	}
 
+	if cart == nil {
+		return &dto.CartResponse{}, nil
+	}
+
 	var items []dto.CartItemResponse
 	var totalPrice float64
 
